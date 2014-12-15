@@ -1,0 +1,105 @@
+---
+title: "Practical Machine Learning Course Project"
+author: "Li Qu"
+output: html_document
+---
+
+###Background
+
+Using devices such as Jawbone Up, Nike FuelBand, and Fitbit it is now possible to collect a large amount of data about personal activity relatively inexpensively. These type of devices are part of the quantified self movement – a group of enthusiasts who take measurements about themselves regularly to improve their health, to find patterns in their behavior, or because they are tech geeks. One thing that people regularly do is quantify how much of a particular activity they do, but they rarely quantify how well they do it. In this project, your goal will be to use data from accelerometers on the belt, forearm, arm, and dumbell of 6 participants. They were asked to perform barbell lifts correctly and incorrectly in 5 different ways. More information is available from the website here: http://groupware.les.inf.puc-rio.br/har (see the section on the Weight Lifting Exercise Dataset). 
+
+###Explortary Data Anlaysis
+From a preview of the data, it has both numerous "NA" and empty filed in it. Thus when loading the data, both forms are read as NA for further processing.
+
+From a first glance at the data, it was composed by 160 variables with 19622 observations in training data set and 20 observations in testing data set. The variables includes identity information of the participants, detected data from sensors on belt, arm and the dumbbell.In order to further investigate the relationship between the variables and the labeled action class, some simple figures was plotted as below.
+
+```{r, echo = F, warning = FALSE, message = FALSE}
+training <- read.csv("./pml-training.csv", na.strings = c("", "NA"))
+testing <- read.csv("./pml-testing.csv", na.strings = c("", "NA"))
+```
+
+```{r, echo = F, warning = FALSE, message = FALSE}
+library(ggplot2)
+belt <- data.frame(training$classe, training[, grep("belt", names(training))])
+arm <- data.frame(training$classe, training[, grep("arm", names(training))])
+dumbbell <- data.frame(training$classe, training[, grep("dumbbell", names(training))])
+
+qplot(1:length(belt$var_total_accel_belt), belt$var_total_accel_belt, color = belt$training.classe)
+qplot(1:length(arm$var_accel_arm), arm$var_accel_arm, color = arm$training.classe)
+qplot(1:length(dumbbell$total_accel_dumbbell), dumbbell$total_accel_dumbbell, color = arm$training.classe)
+```
+
+The figure showed no strong relationship between these single variables with the action class. Thus random forest, which can deal with complicated classification and robust to noise is chosen here for the training model.
+
+
+###Training the Model
+**1. Cross Valdiation**
+
+Generally, as random forest samples the observations and the predictors randomly for each tree, so it naturally has a cross validation during the procedure. Here the cross validation was carried out only to test the expected error for the training data set. Thus 1/10 of the total observation in the training data set was sampled as the sub-testing data set, and the rest of the training data set was applied to random forest training. Since in random forest, the number of the trees is critical to the prediction accuracy, thus the relationship between number of trees and the out-of-bag error rate is plotted as below.
+
+```{r, echo = F, fig.height = 6, fig.width = 8, warning = FALSE, message = FALSE}
+library(caret)
+library(randomForest)
+library(ggplot2)
+#Find the columns with a lot of NAs
+na_indx <- which(sapply(training, function(y) sum(is.na(y)) > 0))
+#Exclude the NAs and the first 7 columns(identification and timestamps, which is unrelavant information)
+train_new <- training[, -c(na_indx, 1:7)]
+
+set.seed(1234)
+sample_indx <- sample(1:nrow(training), round(0.2*nrow(training)))
+#fold <- createFolds(y = train_new$classe,list = T)
+
+fit <- randomForest(classe ~., data = train_new[-sample_indx,], ntree=30)
+plot(fit, main = "Number of Trees vs. Out-of-Bag Error Rate")
+```
+
+From the figure above, the error rate dereases rapidly when the number of the trees is below 20, and the error rate gets flattened afterwards. Thus the number of trees for the random forest is chosen as 30 to train the data set.
+
+**2. Training with Random Forest**
+```{r, echo = F, warning = FALSE, message = FALSE}
+pre_train <- predict(fit, train_new[-sample_indx,])
+pre_test <- predict(fit, train_new[sample_indx, ])
+
+table(pre_train, train_new[-sample_indx,]$classe)
+table(pre_test, train_new[sample_indx, ]$classe)
+
+acc_train <- sum(pre_train == train_new[-sample_indx,]$classe)/nrow(train_new[-sample_indx,])
+acc_test <- sum(pre_test == train_new[sample_indx, ]$classe)/nrow(train_new[sample_indx, ])
+```
+
+The prediction results showed that the action was perfectly classified in the sub-training data set. The prediction accuracy of the sub-testing data set is **`r acc_test`**. This is the expected prediction accuracy for the testing results. 
+
+```{r, echo = F, warning = FALSE, message = FALSE}
+fit <- randomForest(classe ~., data = train_new, ntree=30)
+pre <- predict(fit, train_new)
+acc <- sum(pre == train_new$classe)/nrow(train_new)
+table(pre, train_new$classe)
+
+pre_t <- predict(fit, testing)
+```
+
+Then the model is applied to the whole training data set, and the prediction accuracy is **`r acc`**, which shows a perfect prediction.
+
+The model is then applied to the testing data set to predict the testing results.
+
+
+```{r, echo = F}
+pml_write_files = function(x){
+  n = length(x)
+  for(i in 1:n){
+    filename = paste0("problem_id_",i,".txt")
+    write.table(x[i],file=filename,quote=FALSE,row.names=FALSE,col.names=FALSE)
+  }
+}
+
+pml_write_files(pre_t)
+```
+
+
+###Acknowledgement
+This data used in this course project is provided by http://groupware.les.inf.puc-rio.br/har.The author thanks the data provider for their generosity.
+
+
+
+
