@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <meta charset='utf-8'>
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <meta name="description" content="Machinelearningproject : ">
+
+    <link rel="stylesheet" type="text/css" media="screen" href="stylesheets/stylesheet.css">
+
+    <title>Machinelearningproject</title>
+  </head>
+
+  <body>
+
+    <!-- HEADER -->
+    <div id="header_wrap" class="outer">
+        <header class="inner">
+          <a id="forkme_banner" href="https://github.com/qli1205/MachineLearningProject">View on GitHub</a>
+
+          <h1 id="project_title">Machinelearningproject</h1>
+          <h2 id="project_tagline"></h2>
+
+            <section id="downloads">
+              <a class="zip_download_link" href="https://github.com/qli1205/MachineLearningProject/zipball/master">Download this project as a .zip file</a>
+              <a class="tar_download_link" href="https://github.com/qli1205/MachineLearningProject/tarball/master">Download this project as a tar.gz file</a>
+            </section>
+        </header>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div id="main_content_wrap" class="outer">
+      <section id="main_content" class="inner">
+        <h2>
+<a id="practical-machine-learning-course-project" class="anchor" href="#practical-machine-learning-course-project" aria-hidden="true"><span class="octicon octicon-link"></span></a>Practical Machine Learning Course Project</h2>
+
+<h3>
+<a id="li-qu" class="anchor" href="#li-qu" aria-hidden="true"><span class="octicon octicon-link"></span></a>Li Qu</h3>
+
+<h3>
+<a id="background" class="anchor" href="#background" aria-hidden="true"><span class="octicon octicon-link"></span></a>Background</h3>
+
+<p>Using devices such as Jawbone Up, Nike FuelBand, and Fitbit it is now possible to collect a large amount of data about personal activity relatively inexpensively. These type of devices are part of the quantified self movement – a group of enthusiasts who take measurements about themselves regularly to improve their health, to find patterns in their behavior, or because they are tech geeks. One thing that people regularly do is quantify how much of a particular activity they do, but they rarely quantify how well they do it. In this project, your goal will be to use data from accelerometers on the belt, forearm, arm, and dumbell of 6 participants. They were asked to perform barbell lifts correctly and incorrectly in 5 different ways. More information is available from the website here: <a href="http://groupware.les.inf.puc-rio.br/har">http://groupware.les.inf.puc-rio.br/har</a> (see the section on the Weight Lifting Exercise Dataset). </p>
+
+<h3>
+<a id="explortary-data-anlaysis" class="anchor" href="#explortary-data-anlaysis" aria-hidden="true"><span class="octicon octicon-link"></span></a>Explortary Data Anlaysis</h3>
+
+<p>From a preview of the data, it has both numerous "NA" and empty filed in it. Thus when loading the data, both forms are read as NA for further processing.</p>
+
+<p>From a first glance at the data, it was composed by 160 variables with 19622 observations in training data set and 20 observations in testing data set. The variables includes identity information of the participants, detected data from sensors on belt, arm and the dumbbell.In order to further investigate the relationship between the variables and the labeled action class, some simple figures was plotted as below.</p>
+
+<p>[image1]
+[image2]
+[image3]
+The figure showed no strong relationship between these single variables with the action class. Thus random forest, which can deal with complicated classification and robust to noise is chosen here for the training model.</p>
+
+<h3>
+<a id="training-the-model" class="anchor" href="#training-the-model" aria-hidden="true"><span class="octicon octicon-link"></span></a>Training the Model</h3>
+
+<p><strong>1. Cross Valdiation</strong></p>
+
+<p>Generally, as random forest samples the observations and the predictors randomly for each tree, so it naturally has a cross validation during the procedure. Here the cross validation was carried out only to test the expected error for the training data set. Thus 1/10 of the total observation in the training data set was sampled as the sub-testing data set, and the rest of the training data set was applied to random forest training. Since in random forest, the number of the trees is critical to the prediction accuracy, thus the relationship between number of trees and the out-of-bag error rate is plotted as below.</p>
+
+<p>[image4]</p>
+
+<p>From the figure above, the error rate dereases rapidly when the number of the trees is below 20, and the error rate gets flattened afterwards. Thus the number of trees for the random forest is chosen as 30 to train the data set.</p>
+
+<p><strong>2. Training with Random Forest</strong></p>
+
+<p>The prediction results showed that the action was perfectly classified in the sub-training data set. The prediction accuracy of the sub-testing data set is <strong>0.9946</strong>. This is the expected prediction accuracy for the testing results. </p>
+
+<p>Then the model is applied to the whole training data set, and the prediction accuracy is <strong>1</strong>, which shows a perfect prediction.</p>
+
+<p>The model is then applied to the testing data set to predict the testing results.</p>
+
+<h3>
+<a id="acknowledgement" class="anchor" href="#acknowledgement" aria-hidden="true"><span class="octicon octicon-link"></span></a>Acknowledgement</h3>
+
+<p>This data used in this course project is provided by <a href="http://groupware.les.inf.puc-rio.br/har.The">http://groupware.les.inf.puc-rio.br/har.The</a> author thanks the data provider for their generosity.</p>
+      </section>
+    </div>
+
+    <!-- FOOTER  -->
+    <div id="footer_wrap" class="outer">
+      <footer class="inner">
+        <p class="copyright">Machinelearningproject maintained by <a href="https://github.com/qli1205">qli1205</a></p>
+        <p>Published with <a href="http://pages.github.com">GitHub Pages</a></p>
+      </footer>
+    </div>
+
+    
+
+  </body>
+</html>
